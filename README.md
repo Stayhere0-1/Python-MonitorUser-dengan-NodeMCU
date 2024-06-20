@@ -2,12 +2,13 @@
 Mengolah data dari sensor-sensor yang terhubung dengan NodeMCU v1 dengan python flask
 
 ALAT:
-NodeMCUv1
-DHT11 (Sensor Suhu dan Kelembaban)
-HC-SR04 (Sensor jarak ultrasonik)
-LDR (Sensor-Cahaya)
-L2C (LCD)
+1.NodeMCUv1
+2.DHT11 (Sensor Suhu dan Kelembaban)
+3.HC-SR04 (Sensor jarak ultrasonik)
+4.LDR (Sensor-Cahaya)
+5.L2C (LCD)
 
+#
 Python-Flask
 JavaScript
 CSS
