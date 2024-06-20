@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sensor Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+</head>
+<body>
+    <h1>Sensor Dashboard</h1>
+    <img id="sensorDashboard" src="/static/biasa.gif" alt="Sensor Dashboard Animation">
+    <div class="gauges">
+        <div class="gauge-container">
+            <h1></h1>
+            <h1 style="font-size: 100%;text-align: center;">Suhu</h1>
+            <canvas id="temperatureGauge"></canvas>
+        </div>
+        <div class="gauge-container">
+            <h1 style="font-size: 100%;text-align: center;">Kelembaban</h1>
+            <canvas id="humidityGauge"></canvas>
+        </div>
+        <div class="gauge-container">
+            <h1 style="font-size: 100%;text-align: center;">Jarak</h1>
+            <canvas id="distanceGauge"></canvas>
+        </div>
+        <div class="gauge-container">
+            <h1 style="font-size: 100%;text-align: center;">Cahaya</h1>
+            <canvas id="lightGauge"></canvas>
+        </div>
+    </div>
+   
+
+    <script>
+        const gaugeOptions = {
+            type: 'doughnut',
+            plugins: [ChartDataLabels],
+            options: {
+                responsive: true,
+                plugins: {
+                    datalabels: {
+                        display: true,
+                        color: 'black',
+                        formatter: (value, context) => {
+                            const percentage = value;
+                            const dataLabel = context.chart.data.labels[context.dataIndex];
+                            return value + dataLabel;
+                        },
+                    }
+                },
+                circumference: 180,
+                rotation: -90,
+                cutout: '70%',
+                tooltips: { enabled: false },
+                hover: { mode: null }
+            }
+        };
+
+        const temperatureGauge = new Chart(document.getElementById('temperatureGauge').getContext('2d'), {
+            ...gaugeOptions,
+            data: {
+                datasets: [{
+                    data: [0, 100],
+                    backgroundColor: ['#ff6384', '#e0e0e0'],
+                }],
+                labels: ['°C'],
+            }
+        });
+
+        const humidityGauge = new Chart(document.getElementById('humidityGauge').getContext('2d'), {
+            ...gaugeOptions,
+            data: {
+                datasets: [{
+                    data: [0, 100],
+                    backgroundColor: ['#36a2eb', '#e0e0e0'],
+                }],
+                labels: ['%'],
+            }
+        });
+
+        const distanceGauge = new Chart(document.getElementById('distanceGauge').getContext('2d'), {
+            ...gaugeOptions,
+            data: {
+                datasets: [{
+                    data: [0, 250],
+                    backgroundColor: ['#ffcd56', '#e0e0e0'],
+                }],
+                labels: ['cm'],
+            }
+        });
+
+        const lightGauge = new Chart(document.getElementById('lightGauge').getContext('2d'), {
+            ...gaugeOptions,
+            data: {
+                datasets: [{
+                    data: [0, 100],
+                    backgroundColor: ['#4bc0c0', '#e0e0e0'],
+                }],
+                labels: ['%'],
+            }
+        });
+
+        async function fetchData() {
+            try {
+                const response = await fetch('/get_data');
+                const data = await response.json();
+                console.log("Data received from server:", data); // Logging data yang diterima
+                //Penetapan kondisi
+                const isHot = data.temperature >= 36;
+                const isTooClose = data.distance <= 25;
+                const isDark = data.light <= 20;
+
+                let animationToShow = '/static/biasa.gif';
+                //Action
+                if (isDark) {
+                    animationToShow = '/static/gelap.gif';
+                } else if (isTooClose) {
+                    animationToShow = '/static/terlalu_dekat.gif';
+                } else if (isHot) {
+                    animationToShow = '/static/panas.gif';
+                }
+
+                const sensorDashboard = document.getElementById('sensorDashboard');
+                sensorDashboard.src = animationToShow;
+
+                updateGauge(temperatureGauge, data.temperature, 100);
+                updateGauge(humidityGauge, data.humidity, 100);
+                updateGauge(distanceGauge, data.distance, 250);
+                updateGauge(lightGauge, data.light, 100);
+            } catch (error) {
+                console.error("Error fetching data:", error);
+            }
+        }
+
+        function updateGauge(gauge, value, maxValue) {
+            const validValue = isNaN(value) ? 0 : value;
+            gauge.data.datasets[0].data[0] = validValue;
+            gauge.data.datasets[0].data[1] = maxValue - validValue;
+            gauge.update();
+        }
+
+        setInterval(fetchData, 5000);
+        fetchData();
+    </script>
+</body>
+</html>
+``
