@@ -1,7 +1,8 @@
 # Python-MonitorUser-dengan-NodeMCU
-Mengolah data dari sensor-sensor yang terhubung dengan NodeMCU v1 dengan python flask
+# Mengolah data dari sensor-sensor yang terhubung dengan NodeMCU v1 dengan menggunakan python flask
 
 ALAT:
+
 1.NodeMCUv1
 
 2.DHT11 (Sensor Suhu dan Kelembaban)
